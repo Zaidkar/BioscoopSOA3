@@ -27,13 +27,13 @@ namespace BioscoopSOA3
 
         public double getPrice()
         {
-            return 10.0;
+            return Screening.getPricePerSeat();
 
         }
 
         public override string ToString()
         {
-            return $"Seat {seatNr} in row {rowNr} for {Screening.Movie.Title} at {Screening.DateAndTime}, Premium: {isPremium}, Price: {getPrice():C}";
+            return $"Seat {seatNr} in row {rowNr} for {Screening.Movie.Title} at {Screening.DateAndTime}, Premium: {isPremium}, Price: {getPrice()}";
         }
 
 

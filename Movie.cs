@@ -27,9 +27,5 @@ namespace BioscoopSOA3
             return Title;
         }
 
-
-
-        
-        
     }
 }

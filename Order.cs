@@ -7,31 +7,137 @@ namespace BioscoopSOA3
 {
     public class Order
     {
-        public int OrderNr { get; set; }
+        public int orderNr { get; set; }
         public Boolean isStudent { get; set; }
-        public List<MovieTicket> Tickets { get; set; } = new List<MovieTicket>();
+        private const double groupDiscount = 0.9;
+        public List<MovieTicket> tickets { get; set; } = new List<MovieTicket>();
         public Order(int orderNr, Boolean isStudent)
         {
-            OrderNr = orderNr;
+            this.orderNr = orderNr;
             this.isStudent = isStudent;
         }
 
         public int getOrderNr()
         {
-            return OrderNr;
+            return orderNr;
         }
 
         public void addSeatReservation(MovieTicket ticket)
         {
-            Tickets.Add(ticket);
+            tickets.Add(ticket);
         }
 
         public double calculatePrice()
         {
-            return 0.0;
+            var totalPrice = 0.0;
+            var ticketsToPay = new List<MovieTicket>();
+
+            if (tickets.Count == 0)
+            {
+                return 0.0;
+            }
+
+            if (isStudent)
+            {
+               
+                for (int i = 0; i < tickets.Count; i++)
+                {
+                    if (i % 2 == 0)
+                    {
+                        ticketsToPay.Add(tickets[i]);
+                    }
+                }
+
+                foreach (var ticket in ticketsToPay)
+                {
+                    double price = ticket.getPrice();
+                    if (ticket.isPremiumTicket())
+                    {
+                        price += 2.0;
+                    }
+                    totalPrice += price;
+                }
+            }
+            else
+            {
+
+                var first = tickets.FirstOrDefault();
+                var day = first != null ? first.Screening.DateAndTime.DayOfWeek : DayOfWeek.Monday;
+                bool isWeekday = day != DayOfWeek.Friday && day != DayOfWeek.Saturday && day != DayOfWeek.Sunday;
+
+                if (isWeekday)
+                {
+                    for (int i = 0; i < tickets.Count; i++)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            ticketsToPay.Add(tickets[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    ticketsToPay.AddRange(tickets);
+                }
+
+                foreach (var ticket in ticketsToPay)
+                {
+                    double price = ticket.getPrice();
+                    if (ticket.isPremiumTicket())
+                    {
+                        price += 3.0;
+                    }
+                    totalPrice += price;
+                }
+
+                if (tickets.Count >= 5)
+                {
+                    totalPrice = totalPrice * groupDiscount;
+                }
+            }
+
+            return totalPrice;
         }
 
         public void export(TicketExportFormat exportFormat)
-        {}
+        {
+            switch (exportFormat)
+            {
+                case TicketExportFormat.PLAINTEXT:
+                    foreach (var ticket in tickets)
+                    {
+                        Console.WriteLine(ticket.ToString());
+                    }
+                    Console.WriteLine($"Total Price: {calculatePrice()}");
+                    break;
+                case TicketExportFormat.JSON:
+                    var ticketList = new List<Dictionary<string, object>>();
+                    foreach (var ticket in tickets)
+                    {
+                        var ticketDict = new Dictionary<string, object>
+                        {
+                            { "rowNr", ticket.rowNr },
+                            { "seatNr", ticket.seatNr },
+                            { "isPremium", ticket.isPremium },
+                            { "movieTitle", ticket.Screening.Movie.Title },
+                            { "dateAndTime", ticket.Screening.DateAndTime },
+                            { "price", ticket.getPrice() + (ticket.isPremiumTicket() ? 2.0 : 0.0) }
+                        };
+                        ticketList.Add(ticketDict);
+                    }
+                    var orderDict = new Dictionary<string, object>
+                    {
+                        { "orderNr", orderNr },
+                        { "isStudent", isStudent },
+                        { "tickets", ticketList },
+                        { "totalPrice", calculatePrice() }
+                    };
+                    var json = System.Text.Json.JsonSerializer.Serialize(orderDict, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                    Console.WriteLine(json);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(exportFormat), exportFormat, null);
+            }
+        }
     }
 }
