@@ -9,5 +9,6 @@ namespace BioscoopSOA3
     internal class Movie
     {
         
+        
     }
 }
