@@ -28,5 +28,6 @@ Console.WriteLine();
 order.export(TicketExportFormat.PLAINTEXT);
 
 Console.WriteLine();
+
 Console.WriteLine("JSON export:");
 order.export(TicketExportFormat.JSON);
