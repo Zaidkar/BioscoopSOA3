@@ -10,7 +10,7 @@ namespace BioscoopSOA3
     {
         public string Title { get; set; }
 
-        public List<MovieScreening> screenings { get; set; } = new List<MovieScreening>();
+        public List<MovieScreening> Screenings { get; set; } = new List<MovieScreening>();
 
         public Movie(string title)
         {
@@ -19,13 +19,12 @@ namespace BioscoopSOA3
 
         public void AddScreening(MovieScreening screening)
         {
-            screenings.Add(screening);
+            Screenings.Add(screening);
         }
 
         public override string ToString()
         {
             return Title;
         }
-
     }
 }

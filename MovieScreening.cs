@@ -23,7 +23,7 @@ namespace BioscoopSOA3
             return PricePerSeat;
         }
 
-public override string ToString()
+        public override string ToString()
         {
             return $"{Movie.Title} at {DateAndTime}, Price per seat: {PricePerSeat:C}";
         }
