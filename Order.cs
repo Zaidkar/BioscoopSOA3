@@ -60,7 +60,7 @@ namespace BioscoopSOA3
             }
             else
             {
-                var first = tickets.FirstOrDefault();
+                var first = tickets.First();
                 var day = first != null ? first.Screening.DateAndTime.DayOfWeek : DayOfWeek.Monday;
                 bool isWeekday =
                     day != DayOfWeek.Friday && day != DayOfWeek.Saturday && day != DayOfWeek.Sunday;
