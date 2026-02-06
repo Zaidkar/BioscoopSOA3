@@ -25,78 +25,55 @@ namespace BioscoopSOA3
 
         public void addSeatReservation(MovieTicket ticket)
         {
-            tickets.Add(ticket);
+            tickets.Add(ticket);    
         }
 
         public double calculatePrice()
         {
-            var totalPrice = 0.0;
-            var ticketsToPay = new List<MovieTicket>();
-
             if (tickets.Count == 0)
             {
                 return 0.0;
             }
+            double totalPrice = 0.0;
+            bool secondTicketFree = false;
+            bool groupDiscountApplied = false;
+            double premiumExtra = 0.0;
 
             if (IsStudent)
             {
-                for (int i = 0; i < tickets.Count; i++)
-                {
-                    if (i % 2 == 0)
-                    {
-                        ticketsToPay.Add(tickets[i]);
-                    }
-                }
-
-                foreach (var ticket in ticketsToPay)
-                {
-                    double price = ticket.getPrice();
-                    if (ticket.isPremiumTicket())
-                    {
-                        price += 2.0;
-                    }
-                    totalPrice += price;
-                }
+                secondTicketFree = true;
+                premiumExtra = 2.0;
             }
             else
             {
-                var first = tickets.First();
-                var day = first != null ? first.Screening.DateAndTime.DayOfWeek : DayOfWeek.Monday;
-                bool isWeekday =
-                    day != DayOfWeek.Friday && day != DayOfWeek.Saturday && day != DayOfWeek.Sunday;
+                var first= tickets[0];
+                var day = first.Screening.DateAndTime.DayOfWeek;        
+                bool isWeekday = day != DayOfWeek.Friday && day != DayOfWeek.Saturday && day != DayOfWeek.Sunday;
 
                 if (isWeekday)
                 {
-                    for (int i = 0; i < tickets.Count; i++)
-                    {
-                        if (i % 2 == 0)
-                        {
-                            ticketsToPay.Add(tickets[i]);
-                        }
-                    }
+                    secondTicketFree = true;
                 }
-                else
-                {
-                    ticketsToPay.AddRange(tickets);
-                }
-
-                foreach (var ticket in ticketsToPay)
-                {
-                    double price = ticket.getPrice();
-                    if (ticket.isPremiumTicket())
-                    {
-                        price += 3.0;
-                    }
-                    totalPrice += price;
-                }
-
-                if (tickets.Count >= 5)
-                {
-                    totalPrice = totalPrice * groupDiscount;
-                }
+                premiumExtra = 3.0;
+                groupDiscountApplied = tickets.Count >= 5;
             }
-
+            for (int i = 0; i < tickets.Count; i++)
+            {
+                if (secondTicketFree && i % 2 == 1)
+                {
+                    continue; // Skip the price for the second ticket
+                    
+                }
+                double price = tickets[i].getPrice()
+                        + (tickets[i].isPremiumTicket() ? premiumExtra : 0.0);
+                totalPrice += price;
+            }
+            if (groupDiscountApplied)
+            {
+                totalPrice *= groupDiscount;
+            }
             return totalPrice;
+
         }
 
         public void export(TicketExportFormat exportFormat)
